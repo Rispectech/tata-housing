@@ -166,6 +166,21 @@
         .leaflet-routing-container {
             display: none !important;
         }
+
+        /* Route info label */
+        .route-info-label {
+            background: rgba(66, 133, 244, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 2px solid white;
+            pointer-events: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -214,6 +229,7 @@
         let routingControl;
         let startMarker;
         let endMarker;
+        let routeInfoLabel;
 
         // Fixed end location - Change these coordinates to your desired destination
         const endLocation = [22.5726, 88.3639]; // [latitude, longitude] - Kolkata, West Bengal
@@ -335,6 +351,11 @@
             if (routingControl) {
                 map.removeControl(routingControl);
             }
+            
+            // Remove existing route info label if any
+            if (routeInfoLabel) {
+                map.removeLayer(routeInfoLabel);
+            }
 
             // Create routing control
             routingControl = L.Routing.control({
@@ -358,6 +379,59 @@
                 showAlternatives: false,
                 createMarker: function() { return null; } // Don't create default markers, we have custom ones
             }).addTo(map);
+
+            // Listen for route found event to display distance and time
+            routingControl.on('routesfound', function(e) {
+                const routes = e.routes;
+                if (routes && routes.length > 0) {
+                    const route = routes[0];
+                    const distance = route.summary.totalDistance; // in meters
+                    const time = route.summary.totalTime; // in seconds
+                    
+                    // Convert to readable format
+                    let distanceText;
+                    if (distance >= 1000) {
+                        distanceText = (distance / 1000).toFixed(1) + ' km';
+                    } else {
+                        distanceText = Math.round(distance) + ' m';
+                    }
+                    
+                    let timeText;
+                    if (time >= 3600) {
+                        const hours = Math.floor(time / 3600);
+                        const minutes = Math.floor((time % 3600) / 60);
+                        timeText = hours + 'h ' + minutes + 'm';
+                    } else {
+                        timeText = Math.round(time / 60) + ' min';
+                    }
+                    
+                    // Get route coordinates to find midpoint
+                    const coordinates = route.coordinates;
+                    if (coordinates && coordinates.length > 0) {
+                        // Find midpoint index
+                        const midpointIndex = Math.floor(coordinates.length / 2);
+                        const midpoint = coordinates[midpointIndex];
+                        
+                        // Create label with distance and time
+                        const labelText = distanceText + ' • ' + timeText;
+                        
+                        // Remove existing label if any
+                        if (routeInfoLabel) {
+                            map.removeLayer(routeInfoLabel);
+                        }
+                        
+                        // Create and add label at midpoint
+                        routeInfoLabel = L.marker([midpoint.lat, midpoint.lng], {
+                            icon: L.divIcon({
+                                className: 'route-info-label',
+                                html: labelText,
+                                iconSize: [null, null],
+                                iconAnchor: [0, 0]
+                            })
+                        }).addTo(map);
+                    }
+                }
+            });
 
             // Fit map to show both markers with padding for info panel
             const group = new L.featureGroup([startMarker, endMarker]);
