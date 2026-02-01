@@ -73,6 +73,11 @@
       transform: translateY(0) scale(1.05);
     }
 
+    .cta-button-2:hover {
+      background: #fae6a1;
+      border-color: #ae872a;
+    }
+
     .cta-button:active {
       transform: translateY(0) scale(0.95);
     }
@@ -81,12 +86,19 @@
       left: 19px;
       top: 412px;
       animation-delay: 0.2s;
+      padding: 7px 8px;
+      font-size: 10px;
     }
 
     .cta-button-2 {
-      left: 113px;
+      right: 19px;
       top: 412px;
       animation-delay: 0.4s;
+      padding: 7px 8px;
+      font-size: 10px;
+      background: #f8eaa3;
+      border: 1px solid #ae872a;
+      color: #1b2953;
     }
 
     @keyframes slideUp {
@@ -112,7 +124,7 @@
   <div class="cta-container">
     <div class="background-image">
       <!-- Replace this src with your actual image URL -->
-      <img src="320x480.jpg" alt="TATA Housing - Ready to Move-in Homes">
+      <img src="320x480.png" alt="TATA Housing - Ready to Move-in Homes">
     </div>
     
     <button class="cta-button cta-button-1" onclick="window.location.href='../map/'">
